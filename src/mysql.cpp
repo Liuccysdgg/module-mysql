@@ -426,16 +426,16 @@ void module::mysql_regist(sol::state* lua)
     (*lua)["DESC"] = ylib::sort::DESC;
     (*lua)["ASC"] = ylib::sort::ASC;
     
-    lua->new_usertype<ylib::mysql::conn>("mysql_conn",
-        "clear", &ylib::mysql::conn::clear,
-        "close", &ylib::mysql::conn::close,
-        "commit", &ylib::mysql::conn::commit,
-        "insert_id", &ylib::mysql::conn::insert_id,
-        "last_error", &ylib::mysql::conn::last_error,
-        "recover", &ylib::mysql::conn::recover,
-        "rollback", &ylib::mysql::conn::rollback,
-        "setsql", &ylib::mysql::conn::setsql
-    );
+    //lua->new_usertype<ylib::mysql::conn>("mysql_conn",
+    //    "clear", &ylib::mysql::conn::clear,
+    //    "close", &ylib::mysql::conn::close,
+    //    "commit", &ylib::mysql::conn::commit,
+    //    "insert_id", &ylib::mysql::conn::insert_id,
+    //    "last_error", &ylib::mysql::conn::last_error,
+    //    "recover", &ylib::mysql::conn::recover,
+    //    "rollback", &ylib::mysql::conn::rollback,
+    //    "setsql", &ylib::mysql::conn::setsql
+    //);
     lua->new_usertype<module::mysql>("mysql_pool",
         "new", sol::constructors<module::mysql()>(),
         "start", &module::mysql::start,
@@ -452,6 +452,8 @@ void module::mysql_regist(sol::state* lua)
     module::update::regist(lua);
     module::delete_::regist(lua);
     module::insert::regist(lua);
+    module::mysql_conn::regist(lua);
+    module::mysql_prepare_statement::regist(lua);
 
 }
 
@@ -503,7 +505,12 @@ std::shared_ptr<module::delete_> module::mysql::delete_()
     return std::make_shared<module::delete_>(m_pool->get());
 }
 
-void module::mysql::regist_global(const std::string& name, sol::state* lua)
+std::shared_ptr<module::mysql_conn> module::mysql::get()
+{
+    return std::make_shared<module::mysql_conn>(m_pool->get());
+}
+
+void module::mysql::regist_global(const char* name, sol::state* lua)
 {
     lua->registry()[name] = this;
     (*lua)[name] = this;
@@ -566,7 +573,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
         GET_VALUE(get_int32);
     }
       
-    else if (type == "varchar" || type == "char" || type == "text" || type == "datetime")
+    else if (type == "varchar" || type == "char" || type == "text" || type == "datetime" || type == "binary")
     {
         GET_VALUE(get_string);
     }
@@ -615,3 +622,149 @@ void module::mysql_result::regist(sol::state* lua)
     );
 }
 
+module::mysql_conn::mysql_conn(ylib::mysql::conn* conn)
+{
+    m_conn = conn;
+}
+
+module::mysql_conn::~mysql_conn()
+{
+    if (m_conn != nullptr)
+    {
+        m_conn->pool()->recover(m_conn);
+        m_conn = nullptr;
+    }
+}
+
+void module::mysql_conn::clear()
+{
+    m_conn->clear();
+}
+
+std::shared_ptr<module::mysql_prepare_statement> module::mysql_conn::setsql(const std::string& sql)
+{
+    return std::make_shared<module::mysql_prepare_statement>(m_conn->setsql(sql));
+}
+
+uint64 module::mysql_conn::insert_id()
+{
+    return m_conn->insert_id();
+}
+
+void module::mysql_conn::begin(bool autocommit)
+{
+    m_conn->begin(autocommit);
+}
+
+void module::mysql_conn::commit()
+{
+    m_conn->commit();
+}
+
+void module::mysql_conn::rollback()
+{
+    m_conn->rollback();
+}
+
+void module::mysql_conn::setDatabase(const std::string& name)
+{
+    m_conn->setDatabase(name);
+}
+
+void module::mysql_conn::regist(sol::state* lua)
+{
+    lua->new_usertype<module::mysql_conn>("mysql_conn",
+        "begin", &module::mysql_conn::begin,
+        "clear", &module::mysql_conn::clear,
+        "commit", &module::mysql_conn::commit,
+        "insert_id", &module::mysql_conn::insert_id,
+        "rollback", &module::mysql_conn::rollback,
+        "setDatabase", &module::mysql_conn::setDatabase,
+        "setsql", &module::mysql_conn::setsql
+    );
+}
+
+module::mysql_prepare_statement::mysql_prepare_statement(ylib::mysql::prepare_statement* pstt):m_pstt(pstt)
+{
+}
+
+module::mysql_prepare_statement::~mysql_prepare_statement()
+{
+}
+
+void module::mysql_prepare_statement::set_bigint(uint32 index, const std::string& value)
+{
+    m_pstt->set_bigint(index, value);
+}
+
+void module::mysql_prepare_statement::set_boolean(uint32 index, bool value)
+{
+    m_pstt->set_boolean(index, value);
+}
+
+void module::mysql_prepare_statement::set_datetime(uint32 index, const std::string& value)
+{
+    m_pstt->set_datetime(index, value);
+}
+
+void module::mysql_prepare_statement::set_dob(uint32 index, double value)
+{
+    m_pstt->set_double(index, value);
+}
+
+void module::mysql_prepare_statement::set_i32(uint32 index, int32 value)
+{
+    m_pstt->set_int32(index, value);
+}
+
+void module::mysql_prepare_statement::set_i64(uint32 index, int64 value)
+{
+    m_pstt->set_int64(index, value);
+}
+
+void module::mysql_prepare_statement::set_null(uint32 index)
+{
+    m_pstt->set_null(index);
+}
+
+void module::mysql_prepare_statement::set_str(uint32 index, const std::string& value)
+{
+    m_pstt->set_string(index, value);
+}
+
+void module::mysql_prepare_statement::set_blob(uint32 index, const ylib::buffer& value)
+{
+    m_pstt->set_blob(index, value);
+}
+
+void module::mysql_prepare_statement::clear()
+{
+    m_pstt->clear();
+}
+
+uint64 module::mysql_prepare_statement::update()
+{
+    return m_pstt->update();
+}
+
+std::shared_ptr<module::mysql_result> module::mysql_prepare_statement::query()
+{
+    return std::make_shared<module::mysql_result>(m_pstt->query());
+}
+
+void module::mysql_prepare_statement::regist(sol::state* lua)
+{
+    lua->new_usertype<module::mysql_prepare_statement>("mysql_prepare_statement",
+        "begin", &module::mysql_prepare_statement::clear,
+        "clear", &module::mysql_prepare_statement::query,
+        "set_bigint", &module::mysql_prepare_statement::set_bigint,
+        "set_blob", &module::mysql_prepare_statement::set_blob,
+        "set_boolean", &module::mysql_prepare_statement::set_boolean,
+        "set_datetime", &module::mysql_prepare_statement::set_datetime,
+        "set_dob", &module::mysql_prepare_statement::set_dob,
+        "set_i32", &module::mysql_prepare_statement::set_i32,
+        "set_i64", &module::mysql_prepare_statement::set_i64,
+        "set_str", &module::mysql_prepare_statement::set_str
+
+    );
+}

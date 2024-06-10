@@ -148,6 +148,47 @@ namespace module
 	private:
 		std::shared_ptr <ylib::delete_> m_delete;
 	};
+
+	class mysql_prepare_statement{
+	public:
+		mysql_prepare_statement(ylib::mysql::prepare_statement* pstt);
+		~mysql_prepare_statement();
+		void set_bigint(uint32 index, const std::string& value);
+		void set_boolean(uint32 index, bool value);
+		void set_datetime(uint32 index, const std::string& value);
+		void set_dob(uint32 index, double value);
+		void set_i32(uint32 index, int32 value);
+		void set_i64(uint32 index, int64 value);
+		void set_null(uint32 index);
+		void set_str(uint32 index, const std::string& value);
+		void set_blob(uint32 index, const ylib::buffer& value);
+		void clear();
+		uint64 update();
+		std::shared_ptr<module::mysql_result> query();
+
+		static void regist(sol::state* lua);
+	private:
+		ylib::mysql::prepare_statement* m_pstt = nullptr;
+	};
+
+	class mysql_conn
+	{
+	public:
+		mysql_conn(ylib::mysql::conn* conn);
+		~mysql_conn();
+
+		void clear();
+		std::shared_ptr<module::mysql_prepare_statement> setsql(const std::string& sql);
+		uint64 insert_id();
+		void begin(bool autocommit = false);
+		void commit();
+		void rollback();
+		void setDatabase(const std::string& name);
+
+		static void regist(sol::state* lua);
+	private:
+		ylib::mysql::conn* m_conn = nullptr;
+	};
 	/// <summary>
 	/// MYSQL连接池
 	/// </summary>
@@ -176,11 +217,13 @@ namespace module
 		std::shared_ptr<module::insert> insert();
 		std::shared_ptr<module::update> update();
 		std::shared_ptr<module::delete_> delete_();
+
+		std::shared_ptr<module::mysql_conn> get();
 	private:
 		std::shared_ptr<ylib::mysql::pool> m_pool;
 
 		// 通过 imodule 继承
-		virtual void regist_global(const std::string& name, sol::state* lua);
+		virtual void regist_global(const char* name, sol::state* lua);
 		virtual void delete_global() { delete this; }
 	};
 

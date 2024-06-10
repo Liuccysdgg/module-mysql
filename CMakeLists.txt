@@ -59,7 +59,7 @@ if(MSVC)
 			$<$<CONFIG:Debug>:${YLIB}/lib/ylib_d.lib>
 
 			$<$<CONFIG:Release>:${FASTWEB}/bin/release/3rdparty/lib/lua.lib>
-			$<$<CONFIG:Release>:D:/3rdparty/mysql-connector-c++-8.2.0-winx64-release/lib64/vs14/mysqlcppconn.lib>
+			$<$<CONFIG:Release>:D:/mysql-connector-c++-8.2.0-winx64-release/lib64/vs14/mysqlcppconn.lib>
 			$<$<CONFIG:Release>:${YLIB}/lib/ylib.lib>
 	)
 else()
