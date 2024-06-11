@@ -41,8 +41,15 @@ include_directories(
 	${FASTWEB}/include/lua
 )
 
+if(MSVC)
+	add_definitions(/bigobj)
+	set(MYSQL_CPP_LIB_DIR "$ENV{USERPROFILE}/MySQL/MySQL Connector C++ 8.2.0/lib64")
+endif()
+
 # 添加共享库
 add_library(${MODULE_NAME} SHARED ${HEADER_FILES} ${SOURCE_FILES})
+
+
 
 if(MSVC)
 	target_link_libraries(${MODULE_NAME} PRIVATE
@@ -55,17 +62,19 @@ if(MSVC)
 			
 			${YLIB}/lib/libcrypto_static_win64.lib
 			$<$<CONFIG:Debug>:${FASTWEB}/bin/debug/3rdparty/lib/lua.lib>
-			$<$<CONFIG:Debug>:D:/3rdparty/mysql-connector-c++-8.2.0-winx64/lib64/vs14/debug/mysqlcppconn.lib>
+			
+			$<$<CONFIG:Debug>:>
 			$<$<CONFIG:Debug>:${YLIB}/lib/ylib_d.lib>
+			$<$<CONFIG:Debug>:${MYSQL_CPP_LIB_DIR}/vs14/debug/mysqlcppconn.lib>
 
 			$<$<CONFIG:Release>:${FASTWEB}/bin/release/3rdparty/lib/lua.lib>
-			$<$<CONFIG:Release>:D:/mysql-connector-c++-8.2.0-winx64-release/lib64/vs14/mysqlcppconn.lib>
 			$<$<CONFIG:Release>:${YLIB}/lib/ylib.lib>
+			$<$<CONFIG:Release>:${MYSQL_CPP_LIB_DIR}/vs14/mysqlcppconn.lib>
 	)
 else()
 	target_link_libraries(${MODULE_NAME} 
 			hpsocket
-			ylib
+			ylib 
 			crypto
 			lua5.3
 			mysqlcppconn

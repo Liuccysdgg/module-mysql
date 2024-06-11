@@ -160,8 +160,8 @@ namespace module
 		void set_i32(uint32 index, int32 value);
 		void set_i64(uint32 index, int64 value);
 		void set_null(uint32 index);
-		void set_str(uint32 index, const std::string& value);
-		void set_blob(uint32 index, const ylib::buffer& value);
+		void set_str(uint32 index, const std::string_view& value);
+		void set_blob(uint32 index,const std::string_view& value);
 		void clear();
 		uint64 update();
 		std::shared_ptr<module::mysql_result> query();
@@ -174,8 +174,12 @@ namespace module
 	class mysql_conn
 	{
 	public:
+		mysql_conn();
 		mysql_conn(ylib::mysql::conn* conn);
 		~mysql_conn();
+
+		int connect(const std::string& ipaddress, const std::string& username, const std::string& password, const std::string& database, const std::string& charset, ushort port);
+
 
 		void clear();
 		std::shared_ptr<module::mysql_prepare_statement> setsql(const std::string& sql);
@@ -184,7 +188,7 @@ namespace module
 		void commit();
 		void rollback();
 		void setDatabase(const std::string& name);
-
+		std::string last_error();
 		static void regist(sol::state* lua);
 	private:
 		ylib::mysql::conn* m_conn = nullptr;

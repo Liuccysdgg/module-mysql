@@ -561,7 +561,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
         type = m_result->field_type(obj.as<std::string>());
     else if (obj.get_type() == sol::type::number)
         type = m_result->field_type(obj.as<int>());
-
+     
 #define GET_VALUE(FUNCTION)                                                                                             \
     if (obj.get_type() == sol::type::string)                                                                                    \
         return sol::make_object(s, m_result->FUNCTION(obj.as<std::string>()));                          \
@@ -573,7 +573,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
         GET_VALUE(get_int32);
     }
       
-    else if (type == "varchar" || type == "char" || type == "text" || type == "datetime" || type == "binary")
+    else if (type == "varchar" || type == "char" || type == "text" || type == "datetime")
     {
         GET_VALUE(get_string);
     }
@@ -588,6 +588,23 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
     else if (type == "decimal")
     {
         GET_VALUE(get_double);
+    }
+    else if (type == "blob" || type == "binary")
+    {
+        std::vector<char> rd;
+        ylib::buffer rb;
+        if (obj.get_type() == sol::type::string)
+        {
+            rb = m_result->get_blob(obj.as<std::string>());
+        }
+        else if (obj.get_type() == sol::type::number)
+        {
+            rb = m_result->get_blob(obj.as<uint32>());
+        }
+        rd.resize(rb.size());
+        for (size_t i = 0; i < rb.size(); i++)
+            rd[i] = rb[i];
+        return sol::make_object(s,rd);
     }
     return sol::make_object(s, sol::nil); 
     
@@ -622,6 +639,11 @@ void module::mysql_result::regist(sol::state* lua)
     );
 }
 
+module::mysql_conn::mysql_conn()
+{
+    m_conn = new ylib::mysql::conn();
+}
+
 module::mysql_conn::mysql_conn(ylib::mysql::conn* conn)
 {
     m_conn = conn;
@@ -631,9 +653,24 @@ module::mysql_conn::~mysql_conn()
 {
     if (m_conn != nullptr)
     {
-        m_conn->pool()->recover(m_conn);
+        if (m_conn->pool() != nullptr)
+            m_conn->pool()->recover(m_conn);
+        else
+            delete m_conn;
         m_conn = nullptr;
     }
+}
+
+int module::mysql_conn::connect(const std::string& ipaddress, const std::string& username, const std::string& password, const std::string& database, const std::string& charset, ushort port)
+{
+    ylib::mysql::mysql_conn_info info;
+    info.ipaddress = ipaddress;
+    info.username = username;
+    info.password = password;
+    info.charset = charset;
+    info.port = port;
+    info.database = database;
+    return m_conn->start(info);
 }
 
 void module::mysql_conn::clear()
@@ -671,18 +708,26 @@ void module::mysql_conn::setDatabase(const std::string& name)
     m_conn->setDatabase(name);
 }
 
+std::string module::mysql_conn::last_error()
+{
+    return m_conn->last_error();
+}
+
 void module::mysql_conn::regist(sol::state* lua)
 {
     lua->new_usertype<module::mysql_conn>("mysql_conn",
+        "new", sol::constructors<module::mysql_conn(), module::mysql_conn(ylib::mysql::conn*)>(),
         "begin", &module::mysql_conn::begin,
         "clear", &module::mysql_conn::clear,
-        "commit", &module::mysql_conn::commit,
+        "commit", &module::mysql_conn::commit, 
         "insert_id", &module::mysql_conn::insert_id,
         "rollback", &module::mysql_conn::rollback,
         "setDatabase", &module::mysql_conn::setDatabase,
-        "setsql", &module::mysql_conn::setsql
+        "setsql", &module::mysql_conn::setsql,
+        "connect", &module::mysql_conn::connect,
+        "last_error", &module::mysql_conn::last_error
     );
-}
+} 
 
 module::mysql_prepare_statement::mysql_prepare_statement(ylib::mysql::prepare_statement* pstt):m_pstt(pstt)
 {
@@ -727,16 +772,14 @@ void module::mysql_prepare_statement::set_null(uint32 index)
     m_pstt->set_null(index);
 }
 
-void module::mysql_prepare_statement::set_str(uint32 index, const std::string& value)
+void module::mysql_prepare_statement::set_str(uint32 index, const std::string_view& value)
 {
-    m_pstt->set_string(index, value);
+    m_pstt->set_string(index, (char*)value.data(), value.size());
 }
-
-void module::mysql_prepare_statement::set_blob(uint32 index, const ylib::buffer& value)
+void module::mysql_prepare_statement::set_blob(uint32 index,const std::string_view& value) 
 {
-    m_pstt->set_blob(index, value);
+    m_pstt->set_blob(index,value.data(),value.length());
 }
-
 void module::mysql_prepare_statement::clear()
 {
     m_pstt->clear();
@@ -755,8 +798,9 @@ std::shared_ptr<module::mysql_result> module::mysql_prepare_statement::query()
 void module::mysql_prepare_statement::regist(sol::state* lua)
 {
     lua->new_usertype<module::mysql_prepare_statement>("mysql_prepare_statement",
-        "begin", &module::mysql_prepare_statement::clear,
-        "clear", &module::mysql_prepare_statement::query,
+        "update", &module::mysql_prepare_statement::update,
+        "clear", &module::mysql_prepare_statement::clear,
+        "query", &module::mysql_prepare_statement::query,
         "set_bigint", &module::mysql_prepare_statement::set_bigint,
         "set_blob", &module::mysql_prepare_statement::set_blob,
         "set_boolean", &module::mysql_prepare_statement::set_boolean,
@@ -765,6 +809,5 @@ void module::mysql_prepare_statement::regist(sol::state* lua)
         "set_i32", &module::mysql_prepare_statement::set_i32,
         "set_i64", &module::mysql_prepare_statement::set_i64,
         "set_str", &module::mysql_prepare_statement::set_str
-
     );
 }
