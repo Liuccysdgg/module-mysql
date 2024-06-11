@@ -13,13 +13,15 @@ extern "C" {
         return 0;
     }
 }
-module::select::select(ylib::mysql::conn *conn)
+module::select::select(ylib::mysql::conn *conn, bool auto_free_conn):mysql_builder(auto_free_conn)
 {
     m_select = std::make_shared<ylib::select>(conn);
 }
 
 module::select::~select()
 {
+    if (m_auto_free_conn == false)
+        m_select->m_conn = nullptr;
 }
 
 module::select& module::select::where_i32(const std::string& name, const std::string& expression, int32 value)
@@ -114,7 +116,6 @@ uint64 module::select::count()
 void module::select::regist(sol::state* lua)
 {
     lua->new_usertype<module::select>("mysql_builder_select",
-        "new", sol::constructors<module::select(ylib::mysql::conn*)>(),
         "count", &module::select::count,
         "field", &module::select::field,
         "limit", &module::select::limit,
@@ -133,13 +134,15 @@ void module::select::regist(sol::state* lua)
     );
 }
 
-module::update::update(ylib::mysql::conn* conn)
+module::update::update(ylib::mysql::conn* conn, bool auto_free_conn) :mysql_builder(auto_free_conn)
 {
     m_update = std::make_shared<ylib::update>(conn);
 }
 
 module::update::~update()
 {
+    if (m_auto_free_conn == false)
+        m_update->m_conn = nullptr;
 }
 
 module::update& module::update::table(const std::string& table_name)
@@ -163,6 +166,18 @@ module::update& module::update::set_i64(const std::string& name, int64 value)
 module::update& module::update::set_dob(const std::string& name, double value)
 {
     m_update->set(name, value);
+    return *this;
+}
+
+module::update& module::update::set_blob(const std::string& name, const std::string_view& value)
+{
+    std::vector<uchar> byte_vct;
+    byte_vct.resize(value.length());
+
+    for (size_t i = 0; i < value.size(); i++)
+        byte_vct[i] = (uchar)value[i];
+
+    m_update->set(name,byte_vct);
     return *this;
 }
 
@@ -239,7 +254,6 @@ void module::update::clear()
 void module::update::regist(sol::state* lua)
 {
     lua->new_usertype<module::update>("mysql_builder_update",
-        "new", sol::constructors<module::update(ylib::mysql::conn*)>(),
         "exec", &module::update::exec,
         "limit", &module::update::limit,
         "orderby", &module::update::orderby,
@@ -255,17 +269,20 @@ void module::update::regist(sol::state* lua)
         "set_i32", &module::update::set_i32,
         "set_i64", &module::update::set_i64,
         "set_str", &module::update::set_str,
+        "set_blob", &module::update::set_blob,
         "clear", &module::update::clear
     );
 }
 
-module::insert::insert(ylib::mysql::conn* conn)
+module::insert::insert(ylib::mysql::conn* conn, bool auto_free_conn) :mysql_builder(auto_free_conn)
 {
     m_insert = std::make_shared<ylib::insert>(conn);
 }
 
 module::insert::~insert()
 {
+    if (m_auto_free_conn == false)
+        m_insert->m_conn = nullptr;
 }
 
 module::insert& module::insert::table(const std::string& table_name)
@@ -298,6 +315,18 @@ module::insert& module::insert::set_str(const std::string& name, const std::stri
     return *this;
 }
 
+module::insert& module::insert::set_blob(const std::string& name, const std::string_view& value)
+{
+    std::vector<uchar> byte_vct;
+    byte_vct.resize(value.length());
+
+    for (size_t i = 0; i < value.size(); i++)
+        byte_vct[i] = (uchar)value[i];
+
+    m_insert->set(name, byte_vct);
+    return *this;
+}
+
 module::insert& module::insert::set_not_ppst(const std::string& name, const std::string& value)
 {
     m_insert->set_not_pret(name, value);
@@ -317,7 +346,6 @@ void module::insert::clear()
 void module::insert::regist(sol::state* lua)
 {
     lua->new_usertype<module::insert>("mysql_builder_insert",
-        "new", sol::constructors<module::insert(ylib::mysql::conn*)>(),
         "exec", &module::insert::exec,
         "table", &module::insert::table,
         "set_not_ppst", &module::insert::set_not_ppst,
@@ -325,19 +353,22 @@ void module::insert::regist(sol::state* lua)
         "set_i32", &module::insert::set_i32,
         "set_i64", &module::insert::set_i64,
         "set_str", &module::insert::set_str,
+        "set_blob", &module::insert::set_blob,
         "clear", &module::insert::clear
     );
 }
 
 
 
-module::delete_::delete_(ylib::mysql::conn* conn)
+module::delete_::delete_(ylib::mysql::conn* conn, bool auto_free_conn) :mysql_builder(auto_free_conn)
 {
     m_delete = std::make_shared<ylib::delete_>(conn);
 }
 
 module::delete_::~delete_()
 {
+    if (m_auto_free_conn == false)
+        m_delete->m_conn = nullptr;
 }
 
 module::delete_& module::delete_::table(const std::string& table_name)
@@ -406,7 +437,6 @@ void module::delete_::clear()
 void module::delete_::regist(sol::state* lua)
 {
     lua->new_usertype<module::delete_>("mysql_builder_delete",
-        "new", sol::constructors<module::delete_(ylib::mysql::conn*)>(),
         "exec", &module::delete_::exec,
         "limit", &module::delete_::limit,
         "orderby", &module::delete_::orderby,
@@ -444,7 +474,8 @@ void module::mysql_regist(sol::state* lua)
         "select", &module::mysql::select,
         "update", &module::mysql::update,
         "insert", &module::mysql::insert,
-        "delete", &module::mysql::delete_
+        "delete", &module::mysql::delete_,
+        "get", &module::mysql::get
     );
     module::mysql_result::regist(lua);
 
@@ -487,22 +518,22 @@ void module::mysql::close()
 
 std::shared_ptr<module::select> module::mysql::select()
 {
-    return std::make_shared<module::select>(m_pool->get());
+    return std::make_shared<module::select>(m_pool->get(), true);
 }
 
 std::shared_ptr<module::insert> module::mysql::insert()
 {
-    return std::make_shared<module::insert>(m_pool->get());
+    return std::make_shared<module::insert>(m_pool->get(),true);
 }
 
 std::shared_ptr<module::update> module::mysql::update()
 {
-    return std::make_shared<module::update>(m_pool->get());
+    return std::make_shared<module::update>(m_pool->get(), true);
 }
 
 std::shared_ptr<module::delete_> module::mysql::delete_()
 {
-    return std::make_shared<module::delete_>(m_pool->get());
+    return std::make_shared<module::delete_>(m_pool->get(), true);
 }
 
 std::shared_ptr<module::mysql_conn> module::mysql::get()
@@ -712,6 +743,26 @@ std::string module::mysql_conn::last_error()
 {
     return m_conn->last_error();
 }
+std::shared_ptr<module::select> module::mysql_conn::select()
+{
+    return std::make_shared<module::select>(m_conn, false);
+}
+
+std::shared_ptr<module::insert> module::mysql_conn::insert()
+{
+    return std::make_shared<module::insert>(m_conn, false);
+}
+
+std::shared_ptr<module::update> module::mysql_conn::update()
+{
+    return std::make_shared<module::update>(m_conn, false);
+}
+
+std::shared_ptr<module::delete_> module::mysql_conn::delete_()
+{
+    return std::make_shared<module::delete_>(m_conn, false);
+}
+
 
 void module::mysql_conn::regist(sol::state* lua)
 {
@@ -725,7 +776,11 @@ void module::mysql_conn::regist(sol::state* lua)
         "setDatabase", &module::mysql_conn::setDatabase,
         "setsql", &module::mysql_conn::setsql,
         "connect", &module::mysql_conn::connect,
-        "last_error", &module::mysql_conn::last_error
+        "last_error", &module::mysql_conn::last_error,
+        "select", &module::mysql_conn::select,
+        "update", &module::mysql_conn::update,
+        "insert", &module::mysql_conn::insert,
+        "delete", &module::mysql_conn::delete_
     );
 } 
 

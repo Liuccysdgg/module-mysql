@@ -66,10 +66,22 @@ namespace module
 		ylib::mysql::result* m_result = nullptr;
 	};
 
-
-	class select {
+	class mysql_builder {
 	public:
-		select(ylib::mysql::conn* conn);
+		mysql_builder(bool auto_free_conn) {
+			this->m_auto_free_conn = auto_free_conn;
+		}
+		~mysql_builder()
+		{
+
+		}
+	protected:
+		bool m_auto_free_conn = false;
+	};
+
+	class select :public mysql_builder {
+	public:
+		select(ylib::mysql::conn* conn,bool auto_free_conn);
 		~select();
 		module::select& where_i32(const std::string& name, const std::string& expression, int32 value);
 		module::select& where_i64(const std::string& name, const std::string& expression, int64 value);
@@ -89,15 +101,17 @@ namespace module
 	private:
 		std::shared_ptr<ylib::select> m_select;
 	};
-	class update {
+	class update :public mysql_builder {
 	public:
-		update(ylib::mysql::conn* conn);
+		update(ylib::mysql::conn* conn, bool auto_free_conn);
 		~update();
 		module::update& table(const std::string& table_name);
 		module::update& set_i32(const std::string& name, int32 value);
 		module::update& set_i64(const std::string& name, int64 value);
 		module::update& set_dob(const std::string& name, double value);
 		module::update& set_str(const std::string& name, const std::string& value);
+		module::update& set_blob(const std::string& name, const std::string_view& value);
+
 		module::update& set(const std::string& expression);
 		module::update& where_i32(const std::string& name, const std::string& expression, int32 value);
 		module::update& where_i64(const std::string& name, const std::string& expression, int64 value);
@@ -113,25 +127,28 @@ namespace module
 	private:
 		std::shared_ptr<ylib::update> m_update;
 	};
-	class insert {
+	class insert :public mysql_builder {
 	public:
-		insert(ylib::mysql::conn* conn);
+		insert(ylib::mysql::conn* conn, bool auto_free_conn);
 		~insert();
 		module::insert& table(const std::string& table_name);
 		module::insert& set_i32(const std::string& name, int32 value);
 		module::insert& set_i64(const std::string& name, int64 value);
 		module::insert& set_dob(const std::string& name, double value);
 		module::insert& set_str(const std::string& name, const std::string& value);
+		module::insert& set_blob(const std::string& name, const std::string_view& value);
+
 		module::insert& set_not_ppst(const std::string& name, const std::string& value);
+
 		uint64 exec();
 		void clear();
 		static void regist(sol::state* lua);
 	private:
 		std::shared_ptr<ylib::insert> m_insert;
 	};
-	class delete_ {
+	class delete_ :public mysql_builder {
 	public:
-		delete_(ylib::mysql::conn* conn);
+		delete_(ylib::mysql::conn* conn, bool auto_free_conn);
 		~delete_();
 		module::delete_& table(const std::string& table_name);
 		module::delete_& where_i32(const std::string& name, const std::string& expression, int32 value);
@@ -189,6 +206,13 @@ namespace module
 		void rollback();
 		void setDatabase(const std::string& name);
 		std::string last_error();
+
+		std::shared_ptr<module::select> select();
+		std::shared_ptr<module::insert> insert();
+		std::shared_ptr<module::update> update();
+		std::shared_ptr<module::delete_> delete_();
+
+
 		static void regist(sol::state* lua);
 	private:
 		ylib::mysql::conn* m_conn = nullptr;
