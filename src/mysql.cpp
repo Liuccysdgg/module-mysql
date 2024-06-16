@@ -115,7 +115,7 @@ uint64 module::select::count()
 
 void module::select::regist(sol::state* lua)
 {
-    lua->new_usertype<module::select>("mysql_builder_select",
+    lua->new_usertype<module::select>("fw_mysql_builder_select",
         "count", &module::select::count,
         "field", &module::select::field,
         "limit", &module::select::limit,
@@ -253,7 +253,7 @@ void module::update::clear()
 
 void module::update::regist(sol::state* lua)
 {
-    lua->new_usertype<module::update>("mysql_builder_update",
+    lua->new_usertype<module::update>("fw_mysql_builder_update",
         "exec", &module::update::exec,
         "limit", &module::update::limit,
         "orderby", &module::update::orderby,
@@ -345,7 +345,7 @@ void module::insert::clear()
 
 void module::insert::regist(sol::state* lua)
 {
-    lua->new_usertype<module::insert>("mysql_builder_insert",
+    lua->new_usertype<module::insert>("fw_mysql_builder_insert",
         "exec", &module::insert::exec,
         "table", &module::insert::table,
         "set_not_ppst", &module::insert::set_not_ppst,
@@ -436,7 +436,7 @@ void module::delete_::clear()
 
 void module::delete_::regist(sol::state* lua)
 {
-    lua->new_usertype<module::delete_>("mysql_builder_delete",
+    lua->new_usertype<module::delete_>("fw_mysql_builder_delete",
         "exec", &module::delete_::exec,
         "limit", &module::delete_::limit,
         "orderby", &module::delete_::orderby,
@@ -466,7 +466,7 @@ void module::mysql_regist(sol::state* lua)
     //    "rollback", &ylib::mysql::conn::rollback,
     //    "setsql", &ylib::mysql::conn::setsql
     //);
-    lua->new_usertype<module::mysql>("mysql_pool",
+    lua->new_usertype<module::mysql>("fw_mysql_pool",
         "new", sol::constructors<module::mysql()>(),
         "start", &module::mysql::start,
         "close", &module::mysql::close,
@@ -659,7 +659,7 @@ sol::table module::mysql_result::table(sol::this_state s)
 
 void module::mysql_result::regist(sol::state* lua)
 {
-    lua->new_usertype<module::mysql_result>("mysql_result",
+    lua->new_usertype<module::mysql_result>("fw_mysql_result",
         "field_name", &module::mysql_result::field_name,
         "get", &module::mysql_result::get,
         "next", &module::mysql_result::next,
@@ -766,7 +766,7 @@ std::shared_ptr<module::delete_> module::mysql_conn::delete_()
 
 void module::mysql_conn::regist(sol::state* lua)
 {
-    lua->new_usertype<module::mysql_conn>("mysql_conn",
+    lua->new_usertype<module::mysql_conn>("fw_mysql_conn",
         "new", sol::constructors<module::mysql_conn(), module::mysql_conn(ylib::mysql::conn*)>(),
         "begin", &module::mysql_conn::begin,
         "clear", &module::mysql_conn::clear,
@@ -852,7 +852,7 @@ std::shared_ptr<module::mysql_result> module::mysql_prepare_statement::query()
 
 void module::mysql_prepare_statement::regist(sol::state* lua)
 {
-    lua->new_usertype<module::mysql_prepare_statement>("mysql_prepare_statement",
+    lua->new_usertype<module::mysql_prepare_statement>("fw_mysql_prepare_statement",
         "update", &module::mysql_prepare_statement::update,
         "clear", &module::mysql_prepare_statement::clear,
         "query", &module::mysql_prepare_statement::query,
