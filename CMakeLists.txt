@@ -42,23 +42,20 @@ endif()
 
 # 包含路径
 if(MSVC)
-include_directories(
-	${YLIB}/include
-	${FASTWEB}/include
-	${FASTWEB}/include/lua
-)
-else()
-include_directories(
-	/usr/local/include/ylib
-	/usr/local/include/fastweb
-	../sol2/include
-)
-endif()
-if(MSVC)
+	include_directories(
+		${YLIB}/include
+		${FASTWEB}/include
+		${FASTWEB}/include/lua
+	)
 	add_definitions(/bigobj)
 	set(MYSQL_CPP_LIB_DIR "$ENV{USERPROFILE}/MySQL/MySQL Connector C++ 8.2.0/lib64")
 else()
-	include_directories(/usr/include/lua5.3)
+	include_directories(
+		/usr/local/include/ylib
+		/usr/local/include/fastweb
+		/usr/local/include
+	add_definitions(-DfPIC)
+)
 endif()
 
 # 添加共享库
@@ -91,7 +88,7 @@ else()
 			hpsocket
 			ylib 
 			crypto
-			lua5.3
+			lua
 			mysqlcppconn
 			pthread
 	)
