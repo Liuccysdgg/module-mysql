@@ -212,6 +212,7 @@ namespace module
 		std::shared_ptr<module::update> update();
 		std::shared_ptr<module::delete_> delete_();
 
+		void free();
 
 		static void regist(sol::state* lua);
 	private:
@@ -247,6 +248,8 @@ namespace module
 		std::shared_ptr<module::delete_> delete_();
 
 		std::shared_ptr<module::mysql_conn> get();
+
+		void recover(std::shared_ptr<module::mysql_conn> conn);
 	private:
 		std::shared_ptr<ylib::mysql::pool> m_pool;
 

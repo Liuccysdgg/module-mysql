@@ -475,7 +475,8 @@ void module::mysql_regist(sol::state* lua)
         "update", &module::mysql::update,
         "insert", &module::mysql::insert,
         "delete", &module::mysql::delete_,
-        "get", &module::mysql::get
+        "get", &module::mysql::get,
+        "recover", &module::mysql::recover
     );
     module::mysql_result::regist(lua);
 
@@ -539,6 +540,11 @@ std::shared_ptr<module::delete_> module::mysql::delete_()
 std::shared_ptr<module::mysql_conn> module::mysql::get()
 {
     return std::make_shared<module::mysql_conn>(m_pool->get());
+}
+
+void module::mysql::recover(std::shared_ptr<module::mysql_conn> conn)
+{
+    conn->free();
 }
 
 void module::mysql::regist_global(const char* name, sol::state* lua)
@@ -682,14 +688,7 @@ module::mysql_conn::mysql_conn(ylib::mysql::conn* conn)
 
 module::mysql_conn::~mysql_conn()
 {
-    if (m_conn != nullptr)
-    {
-        if (m_conn->pool() != nullptr)
-            m_conn->pool()->recover(m_conn);
-        else
-            delete m_conn;
-        m_conn = nullptr;
-    }
+    free();
 }
 
 int module::mysql_conn::connect(const std::string& ipaddress, const std::string& username, const std::string& password, const std::string& database, const std::string& charset, ushort port)
@@ -761,6 +760,18 @@ std::shared_ptr<module::update> module::mysql_conn::update()
 std::shared_ptr<module::delete_> module::mysql_conn::delete_()
 {
     return std::make_shared<module::delete_>(m_conn, false);
+}
+
+void module::mysql_conn::free()
+{
+    if (m_conn != nullptr)
+    {
+        if (m_conn->pool() != nullptr)
+            m_conn->pool()->recover(m_conn);
+        else
+            delete m_conn;
+        m_conn = nullptr;
+    }
 }
 
 
