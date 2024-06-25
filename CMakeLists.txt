@@ -31,19 +31,31 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 # 安装复制
 set(CMAKE_INSTALL_ALWAYS_COPY TRUE)
 
+if(MSVC)
 set(YLIB ${CMAKE_INSTALL_PREFIX}/../ylib)
 set(FASTWEB ${CMAKE_INSTALL_PREFIX}/../fastweb)
+else()
+set(YLIB /usr/local/include/ylib)
+set(FASTWEB /usr/local/include/fastweb)
+
+endif()
 
 # 包含路径
-include_directories(
-	${YLIB}/include
-	${FASTWEB}/include
-	${FASTWEB}/include/lua
-)
-
 if(MSVC)
+	include_directories(
+		${YLIB}/include
+		${FASTWEB}/include
+		${FASTWEB}/include/lua
+	)
 	add_definitions(/bigobj)
 	set(MYSQL_CPP_LIB_DIR "$ENV{USERPROFILE}/MySQL/MySQL Connector C++ 8.2.0/lib64")
+else()
+	include_directories(
+		/usr/local/include/ylib
+		/usr/local/include/fastweb
+		/opt/lua54/include
+		/usr/local/include)
+	add_definitions(-DfPIC)
 endif()
 
 # 添加共享库
@@ -76,7 +88,7 @@ else()
 			hpsocket
 			ylib 
 			crypto
-			lua5.3
+			/opt/lua54/lib/liblua.a
 			mysqlcppconn
 			pthread
 	)
