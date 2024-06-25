@@ -50,7 +50,12 @@ end
     @return 返回一个 select 对象
 ]]
 function mysql_pool:select()
-    return select.new(self.module:select())
+    print("SELECT_DEBUG_0:")
+    local s =  self.module:select()
+    print("SELECT_DEBUG_1:",s)
+    local s2 =  select.new(s)
+    print("SELECT_DEBUG_2:",s2)
+    return s2
     --return self.module:select()
 end
 
@@ -75,7 +80,7 @@ end
     @return 返回一个 delete 对象
 ]]
 function mysql_pool:delete()
-    return delete(self.module:delete())
+    return delete.new(self.module:delete())
 end
 
 --[[
@@ -85,9 +90,21 @@ end
 function mysql_pool:get()
     return conn.new(self.module:get())
 end
-
+--[[
+    取自身指针
+]]
 function mysql_pool:self()
     return self.module:self()
 end
+--[[
+    强制回收连接
+]]
+function mysql_pool:recover(conn)
+    if conn == nil then
+        return
+    end
+    return self.module:recover(conn.module)
+end
+
 
 return mysql_pool
