@@ -622,7 +622,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
     {
         GET_VALUE(get_int64);
     }
-    else if (type == "decimal")
+    else if (type == "decimal" || type == "float" || type=="double")
     {
         GET_VALUE(get_double);
     }
