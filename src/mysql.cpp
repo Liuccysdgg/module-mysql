@@ -92,9 +92,9 @@ module::select& module::select::limit(uint32 start, uint32 count)
     return *this;
 }
 
-module::select& module::select::orderby(const std::string& field, int sort)
+module::select& module::select::orderby(const std::string& exp)
 {
-    m_select->orderby(field,(ylib::sort)sort);
+    m_select->orderby(exp);
     return *this;
 }
 
@@ -235,9 +235,9 @@ module::update& module::update::limit(uint32 start, uint32 count)
     return *this;
 }
 
-module::update& module::update::orderby(const std::string& field, int sort)
+module::update& module::update::orderby(const std::string& exp)
 {
-    m_update->orderby(field,(ylib::sort)sort);
+    m_update->orderby(exp);
     return *this;
 }
 
@@ -418,9 +418,9 @@ module::delete_& module::delete_::limit(uint32 start, uint32 count)
     return *this;
 }
 
-module::delete_& module::delete_::orderby(const std::string& field, int sort)
+module::delete_& module::delete_::orderby(const std::string& exp)
 {
-    m_delete->orderby(field, (ylib::sort)sort);
+    m_delete->orderby(exp);
     return *this;
 }
 
@@ -453,9 +453,6 @@ void module::delete_::regist(sol::state* lua)
 
 void module::mysql_regist(sol::state* lua)
 {
-    (*lua)["DESC"] = ylib::sort::DESC;
-    (*lua)["ASC"] = ylib::sort::ASC;
-    
     //lua->new_usertype<ylib::mysql::conn>("mysql_conn",
     //    "clear", &ylib::mysql::conn::clear,
     //    "close", &ylib::mysql::conn::close,
@@ -569,10 +566,10 @@ uint32 module::mysql_result::field_count()
 std::string module::mysql_result::field_type(sol::object obj)
 {
     if (obj.is<int>() || obj.is<double>()) {
-        m_result->field_type((uint32)obj.as<int>());
+        return m_result->field_type((uint32)obj.as<int>());
     }
     else if (obj.is<std::string>()) {
-        m_result->field_type((std::string)obj.as<std::string>());
+        return m_result->field_type((std::string)obj.as<std::string>());
     }
     return "";
 }
@@ -610,7 +607,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
         GET_VALUE(get_int32);
     }
       
-    else if (type == "varchar" || type == "char" || type == "text" || type == "datetime")
+    else if (type == "varchar" || type == "char" || type == "text" || type == "datetime" || type == "date")
     {
         GET_VALUE(get_string);
     }
@@ -642,6 +639,10 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
         for (size_t i = 0; i < rb.size(); i++)
             rd[i] = rb[i];
         return sol::make_object(s,rd);
+    }
+    else
+    {
+        GET_VALUE(get_string);
     }
     return sol::make_object(s, sol::nil); 
     

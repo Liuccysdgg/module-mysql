@@ -169,15 +169,13 @@ end
 
 --[[
     设置排序
-    @param field 字段名称
-    @param sort 排序方式（升序或降序）
-    @return 返回 mysql_builder_update 对象自身，以便链式调用
+    @param orderby 排序语句
+    @return 返回 mysql_builder_select 对象自身，以便链式调用
 ]]
-function mysql_builder_update:orderby(field, sort)
-    self.module:orderby(field, sort)
+function mysql_builder_update:orderby(orderby)
+    self.module:orderby(orderby)
     return self
 end
-
 --[[
     执行更新操作
     @return 返回受影响的行数

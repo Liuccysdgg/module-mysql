@@ -19,7 +19,7 @@ function mysql_conn.new(__module)
     else
         instance.module = __module    
     end
-    
+    print("M:",instance.module)
     return instance
 end
 --[[
@@ -65,7 +65,10 @@ end
     @param autocommit 是否自动提交
 ]]
 function mysql_conn:begin(autocommit)
-    self.module:begin(autocommit or false)
+    if autocommit == nil then
+        autocommit = false
+    end
+    self.module:begin(autocommit)
 end
 
 --[[

@@ -102,14 +102,14 @@ function mysql_builder_delete:limit(start, count)
     return self
 end
 
+
 --[[
     设置排序
-    @param field 字段名称
-    @param sort 排序方式（升序或降序）
-    @return 返回 mysql_builder_delete 对象自身，以便链式调用
+    @param orderby 排序语句
+    @return 返回 mysql_builder_select 对象自身，以便链式调用
 ]]
-function mysql_builder_delete:orderby(field, sort)
-    self.module:orderby(field, sort)
+function mysql_builder_delete:orderby(orderby)
+    self.module:orderby(orderby)
     return self
 end
 

@@ -93,7 +93,7 @@ namespace module
 		module::select& field(sol::table table);
 		module::select& page(uint32 page, uint32 count);
 		module::select& limit(uint32 start, uint32 count);
-		module::select& orderby(const std::string& field, int sort);
+		module::select& orderby(const std::string& exp);
 		void clear();
 		std::shared_ptr<module::mysql_result> query();
 		uint64 count();
@@ -120,7 +120,7 @@ namespace module
 		module::update& where_expression(const std::string& expression);
 		module::update& page(uint32 page, uint32 count);
 		module::update& limit(uint32 start, uint32 count);
-		module::update& orderby(const std::string& field, int sort);
+		module::update& orderby(const std::string& exp);
 		uint64 exec();
 		void clear();
 		static void regist(sol::state* lua);
@@ -158,7 +158,7 @@ namespace module
 		module::delete_& where_expression(const std::string& expression);
 		module::delete_& page(uint32 page, uint32 count);
 		module::delete_& limit(uint32 start, uint32 count);
-		module::delete_& orderby(const std::string& field, int sort);
+		module::delete_& orderby(const std::string& exp);
 		uint64 exec();
 		void clear();
 		static void regist(sol::state* lua);
