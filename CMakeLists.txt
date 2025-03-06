@@ -85,9 +85,7 @@ if(MSVC)
 	)
 else()
 	target_link_libraries(${MODULE_NAME} 
-			hpsocket
 			ylib 
-			crypto
 			/opt/lua54/lib/liblua.a
 			mysqlcppconn
 			pthread
