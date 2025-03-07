@@ -30,7 +30,7 @@ end
     @return 返回 mysql_builder_delete 对象自身，以便链式调用
 ]]
 function mysql_builder_delete:where_i32(name, expression, value)
-    self.module:where_i32(name, expression, value)
+    self.module:where_i32(name, expression, fw_toint(value))
     return self
 end
 
@@ -42,7 +42,7 @@ end
     @return 返回 mysql_builder_delete 对象自身，以便链式调用
 ]]
 function mysql_builder_delete:where_i64(name, expression, value)
-    self.module:where_i64(name, expression, value)
+    self.module:where_i64(name, expression, fw_toint(value))
     return self
 end
 
@@ -98,7 +98,7 @@ end
     @return 返回 mysql_builder_delete 对象自身，以便链式调用
 ]]
 function mysql_builder_delete:limit(start, count)
-    self.module:limit(start, count)
+    self.module:limit(fw_toint(start), fw_toint(count))
     return self
 end
 

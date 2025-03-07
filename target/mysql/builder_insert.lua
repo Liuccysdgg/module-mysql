@@ -29,7 +29,7 @@ end
     @return 返回 mysql_builder_insert 对象自身，以便链式调用
 ]]
 function mysql_builder_insert:set_i32(name, value)
-    self.module:set_i32(name, value)
+    self.module:set_i32(name, fw_toint(value))
     return self
 end
 
@@ -40,7 +40,7 @@ end
     @return 返回 mysql_builder_insert 对象自身，以便链式调用
 ]]
 function mysql_builder_insert:set_i64(name, value)
-    self.module:set_i64(name, value)
+    self.module:set_i64(name, fw_toint(value))
     return self
 end
 

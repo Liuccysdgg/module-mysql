@@ -21,7 +21,7 @@ end
     @return 返回 mysql_builder_select 对象自身，以便链式调用
 ]]
 function mysql_builder_select:where_i32(name, expression, value)
-    self.module:where_i32(name, expression, value)
+    self.module:where_i32(name, expression, fw_toint(value))
     return self
 end
 
@@ -33,7 +33,7 @@ end
     @return 返回 mysql_builder_select 对象自身，以便链式调用
 ]]
 function mysql_builder_select:where_i64(name, expression, value)
-    self.module:where_i64(name, expression, value)
+    self.module:where_i64(name, expression, fw_toint(value))
     return self
 end
 
@@ -109,7 +109,7 @@ end
     @return 返回 mysql_builder_select 对象自身，以便链式调用
 ]]
 function mysql_builder_select:page(page, count)
-    self.module:page(page, count)
+    self.module:page(fw_toint(page), fw_toint(count))
     return self
 end
 
@@ -120,7 +120,7 @@ end
     @return 返回 mysql_builder_select 对象自身，以便链式调用
 ]]
 function mysql_builder_select:limit(start, count)
-    self.module:limit(start, count)
+    self.module:limit(fw_toint(start), fw_toint(count))
     return self
 end
 

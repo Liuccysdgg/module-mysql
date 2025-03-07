@@ -29,7 +29,7 @@ end
     @return 返回 mysql_builder_update 对象自身，以便链式调用
 ]]
 function mysql_builder_update:set_i32(name, value)
-    self.module:set_i32(name, value)
+    self.module:set_i32(name, fw_toint(value))
     return self
 end
 
@@ -40,7 +40,7 @@ end
     @return 返回 mysql_builder_update 对象自身，以便链式调用
 ]]
 function mysql_builder_update:set_i64(name, value)
-    self.module:set_i64(name, value)
+    self.module:set_i64(name, fw_toint(value))
     return self
 end
 
@@ -95,7 +95,7 @@ end
     @return 返回 mysql_builder_update 对象自身，以便链式调用
 ]]
 function mysql_builder_update:where_i32(name, expression, value)
-    self.module:where_i32(name, expression, value)
+    self.module:where_i32(name, expression, fw_toint(value))
     return self
 end
 
@@ -107,7 +107,7 @@ end
     @return 返回 mysql_builder_update 对象自身，以便链式调用
 ]]
 function mysql_builder_update:where_i64(name, expression, value)
-    self.module:where_i64(name, expression, value)
+    self.module:where_i64(name, expression, fw_toint(value))
     return self
 end
 
@@ -152,7 +152,7 @@ end
     @return 返回 mysql_builder_update 对象自身，以便链式调用
 ]]
 function mysql_builder_update:page(page, count)
-    self.module:page(page, count)
+    self.module:page(fw_toint(page), fw_toint(count))
     return self
 end
 
@@ -163,7 +163,7 @@ end
     @return 返回 mysql_builder_update 对象自身，以便链式调用
 ]]
 function mysql_builder_update:limit(start, count)
-    self.module:limit(start, count)
+    self.module:limit(fw_toint(start), fw_toint(count))
     return self
 end
 

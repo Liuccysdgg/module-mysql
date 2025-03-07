@@ -19,7 +19,7 @@ end
     @param value 参数值
 ]]
 function mysql_prepare_statement:set_bigint(index, value)
-    self.module:set_bigint(index, value)
+    self.module:set_bigint(index, fw_toint(value))
 end
 
 --[[
@@ -55,7 +55,7 @@ end
     @param value 参数值
 ]]
 function mysql_prepare_statement:set_i32(index, value)
-    self.module:set_i32(index, value)
+    self.module:set_i32(index, fw_toint(value))
 end
 
 --[[
@@ -64,7 +64,7 @@ end
     @param value 参数值
 ]]
 function mysql_prepare_statement:set_i64(index, value)
-    self.module:set_i64(index, value)
+    self.module:set_i64(index, fw_toint(value))
 end
 
 --[[
