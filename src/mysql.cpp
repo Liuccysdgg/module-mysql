@@ -602,7 +602,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
     else if (obj.get_type() == sol::type::number)                                                                           \
         return sol::make_object(s, m_result->FUNCTION(obj.as<uint32>()))
 
-    if (type == "int" || type == "tinyint")
+    if (type == "int" || type == "tinyint unsigned")
     {
         GET_VALUE(get_int32);
     }
@@ -619,7 +619,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
     {
         GET_VALUE(get_int64);
     }
-    else if (type == "decimal" || type == "float" || type=="double")
+    else if (type == "decimal unsigned" || type == "float" || type=="double")
     {
         GET_VALUE(get_double);
     }
