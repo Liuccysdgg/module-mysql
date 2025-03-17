@@ -98,6 +98,20 @@ module::select& module::select::orderby(const std::string& exp)
     return *this;
 }
 
+module::select& module::select::groupby(const std::string& exp)
+{
+    // TODO: 在此处插入 return 语句
+    m_select->groupby(exp);
+    return *this;
+}
+
+module::select& module::select::having(const std::string& exp)
+{
+    // TODO: 在此处插入 return 语句
+    m_select->having(exp);
+    return *this;
+}
+
 void module::select::clear()
 {
     m_select->clear();
@@ -120,6 +134,8 @@ void module::select::regist(sol::state* lua)
         "field", &module::select::field,
         "limit", &module::select::limit,
         "orderby", &module::select::orderby,
+        "groupby", &module::select::groupby,
+        "having", &module::select::having,
         "page", &module::select::page,
         "table", &module::select::table,
         "where_dob", &module::select::where_dob,

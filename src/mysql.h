@@ -94,6 +94,8 @@ namespace module
 		module::select& page(uint32 page, uint32 count);
 		module::select& limit(uint32 start, uint32 count);
 		module::select& orderby(const std::string& exp);
+		module::select& groupby(const std::string& exp);
+		module::select& having(const std::string& exp);
 		void clear();
 		std::shared_ptr<module::mysql_result> query();
 		uint64 count();
