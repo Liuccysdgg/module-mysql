@@ -133,6 +133,24 @@ function mysql_builder_select:orderby(orderby)
     self.module:orderby(orderby)
     return self
 end
+--[[
+    设置分组
+    @param groupby 排序语句
+    @return 返回 mysql_builder_select 对象自身，以便链式调用
+]]
+function mysql_builder_select:groupby(expd)
+    self.module:groupby(expd)
+    return self
+end
+--[[
+    设置分组结果
+    @param having 排序语句
+    @return 返回 mysql_builder_select 对象自身，以便链式调用
+]]
+function mysql_builder_select:having(expd)
+    self.module:having(expd)
+    return self
+end
 
 --[[
     清空查询条件
