@@ -606,16 +606,16 @@ bool module::mysql_result::next()
 
 sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
 {
-    std::string tmp_log;
+    //std::string tmp_log;
     std::string type;
     if (obj.get_type() == sol::type::string)
     {
-        tmp_log = "[string]=" + obj.as<std::string>();
+        //tmp_log = "[string]=" + obj.as<std::string>();
         type = m_result->field_type(obj.as<std::string>());
     }
     else if (obj.get_type() == sol::type::number)
     {
-        tmp_log = "[int]=" + std::to_string(obj.as<int>());
+        //tmp_log = "[int]=" + std::to_string(obj.as<int>());
         type = m_result->field_type(obj.as<int>());
     }
         
@@ -626,7 +626,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
     else if (obj.get_type() == sol::type::number)                                                                           \
         return sol::make_object(s, m_result->FUNCTION(obj.as<uint32>()))
 
-    std::cout << tmp_log <<"=====" << type << std::endl;
+    //std::cout << tmp_log <<"=====" << type << std::endl;
     if (type == "int" ||  type == "tinyint")
     {
         GET_VALUE(get_int32);
