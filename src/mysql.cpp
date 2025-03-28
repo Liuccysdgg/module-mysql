@@ -627,7 +627,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
         return sol::make_object(s, m_result->FUNCTION(obj.as<uint32>()))
 
     std::cout << tmp_log <<"=====" << type << std::endl;
-    if (type == "int" || type == "tinyint unsigned")
+    if (type == "int" ||  type == "tinyint")
     {
         GET_VALUE(get_int32);
     }
@@ -636,7 +636,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
     {
         GET_VALUE(get_string);
     }
-    else if (type == "int unsigned")
+    else if (type == "int unsigned" || type == "tinyint unsigned")
     {
         GET_VALUE(get_uint32);
     }
