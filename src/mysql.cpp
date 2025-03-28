@@ -90,14 +90,14 @@ module::select& module::select::limit(uint32 start, uint32 count)
 {
     m_select->limit(start,count);
     return *this;
-}
+} 
 
 module::select& module::select::orderby(const std::string& exp)
 {
     m_select->orderby(exp);
     return *this;
 }
-
+ 
 module::select& module::select::groupby(const std::string& exp)
 {
     // TODO: 在此处插入 return 语句
@@ -618,6 +618,7 @@ sol::object module::mysql_result::get(sol::object obj, sol::this_state s)
     else if (obj.get_type() == sol::type::number)                                                                           \
         return sol::make_object(s, m_result->FUNCTION(obj.as<uint32>()))
 
+    std::cout << "[string]:"<< obj.as<std::string>()<<"|"<<"[int]:"<< obj.as<int>()<<"=====" << type << std::endl;
     if (type == "int" || type == "tinyint unsigned")
     {
         GET_VALUE(get_int32);
