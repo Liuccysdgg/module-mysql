@@ -48,7 +48,7 @@ if(MSVC)
 		${FASTWEB}/include/lua
 	)
 	add_definitions(/bigobj)
-	set(MYSQL_CPP_LIB_DIR "$ENV{USERPROFILE}/MySQL/MySQL Connector C++ 8.2.0/lib64")
+	set(MYSQL_CPP_LIB_DIR "D:/code/3rdparty/mysql-connector-c++-8.0.33/lib64")
 else()
 	include_directories(
 		/usr/local/include/ylib
@@ -72,7 +72,7 @@ if(MSVC)
 			WS2_32.lib
 			Shell32.lib
 			
-			${YLIB}/lib/libcrypto_static_win64.lib
+			D:/code/lib/OpenSSL-Win64/lib/libcrypto_static.lib
 			$<$<CONFIG:Debug>:${FASTWEB}/bin/debug/3rdparty/lib/lua.lib>
 			
 			$<$<CONFIG:Debug>:>
@@ -81,7 +81,7 @@ if(MSVC)
 
 			$<$<CONFIG:Release>:${FASTWEB}/bin/release/3rdparty/lib/lua.lib>
 			$<$<CONFIG:Release>:${YLIB}/lib/ylib.lib>
-			$<$<CONFIG:Release>:${MYSQL_CPP_LIB_DIR}/vs14/mysqlcppconn.lib>
+			$<$<CONFIG:Release>:${MYSQL_CPP_LIB_DIR}/vs14/debug/mysqlcppconn.lib>
 	)
 else()
 	target_link_libraries(${MODULE_NAME} 

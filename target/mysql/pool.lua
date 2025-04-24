@@ -50,13 +50,7 @@ end
     @return 返回一个 select 对象
 ]]
 function mysql_pool:select()
-    print("SELECT_DEBUG_0:")
-    local s =  self.module:select()
-    print("SELECT_DEBUG_1:",s)
-    local s2 =  select.new(s)
-    print("SELECT_DEBUG_2:",s2)
-    return s2
-    --return self.module:select()
+    return select.new(self.module:select())
 end
 
 --[[

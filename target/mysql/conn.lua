@@ -19,7 +19,6 @@ function mysql_conn.new(__module)
     else
         instance.module = __module    
     end
-    print("M:",instance.module)
     return instance
 end
 --[[
